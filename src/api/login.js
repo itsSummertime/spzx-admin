@@ -10,11 +10,12 @@
  * @Donate: https://huzhushan.gitee.io/vue3-element-admin/donate/
  */
 import request from '@/utils/request'
+const API = '/admin/system/index/'
 
 // 登录接口
 export const Login = data => {
   return request({
-    url: '/api/login',
+    url: `${API}login`,
     method: 'post',
     data,
   })
@@ -23,7 +24,7 @@ export const Login = data => {
 // 获取登录用户信息
 export const GetUserinfo = () => {
   return request({
-    url: '/api/userinfo',
+    url: `${API}userinfo`,
     method: 'get',
   })
 }
