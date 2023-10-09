@@ -28,3 +28,11 @@ export const GetUserinfo = () => {
     method: 'get',
   })
 }
+
+// 退出
+export const Logout = () => {
+  return request({
+    url: `${API}logout`,
+    method: 'get',
+  })
+}

@@ -1,6 +1,6 @@
 <!--
- * @Descripttion: 
- * @version: 
+ * @Descripttion:
+ * @version:
  * @Date: 2021-04-20 11:06:21
  * @LastEditors: huzhushan@126.com
  * @LastEditTime: 2022-09-27 18:24:27
@@ -102,7 +102,7 @@ export default defineComponent({
     const state = reactive({
       model: {
         userName: 'admin',
-        password: '123456',
+        password: '111111',
       },
       rules: getRules(),
       loading: false,
