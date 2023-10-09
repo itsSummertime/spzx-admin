@@ -24,7 +24,7 @@ export const Login = data => {
 // 获取登录用户信息
 export const GetUserinfo = () => {
   return request({
-    url: `${API}userinfo`,
+    url: `${API}getUserInfo`,
     method: 'get',
   })
 }
