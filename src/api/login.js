@@ -36,3 +36,11 @@ export const Logout = () => {
     method: 'get',
   })
 }
+
+// 获取图片验证码
+export const GetCaptcha = () => {
+  return request({
+    url: `${API}getCaptcha`,
+    method: 'get',
+  })
+}

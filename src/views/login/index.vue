@@ -12,7 +12,7 @@
 <template>
   <div class="login">
     <el-form class="form" :model="model" :rules="rules" ref="loginForm">
-      <h1 class="title">Vue3 Element Admin</h1>
+      <h1 class="title">尚品甄选-后台系统</h1>
       <el-form-item prop="userName">
         <el-input
           class="text"
@@ -32,6 +32,18 @@
           :placeholder="$t('login.password')"
         />
       </el-form-item>
+      <el-form-item prop="captcha">
+        <div class="captcha">
+          <el-input
+            class="text"
+            v-model="model.captcha"
+            prefix-icon="Picture"
+            clearable
+            :placeholder="$t('login.captcha')"
+          />
+          <img :src="model.codeValue" @click="getValidateCode" />
+        </div>
+      </el-form-item>
       <el-form-item>
         <el-button
           :loading="loading"
@@ -39,9 +51,7 @@
           class="btn"
           size="large"
           @click="submit"
-        >
-          {{ btnText }}
-        </el-button>
+        >{{ btnText }}</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -59,8 +69,9 @@ import {
   ref,
   computed,
   watch,
+  onMounted,
 } from 'vue'
-import { Login } from '@/api/login'
+import { Login, GetCaptcha } from '@/api/login'
 import { useRouter, useRoute } from 'vue-router'
 import ChangeLang from '@/layout/components/Topbar/ChangeLang.vue'
 import useLang from '@/i18n/useLang'
@@ -98,11 +109,28 @@ export default defineComponent({
           trigger: 'blur',
         },
       ],
+      captcha: [
+        {
+          required: true,
+          message: ctx.$t('login.rules-captcha'),
+          trigger: 'blur',
+        }
+      ],
     })
+
+    //钩子函数onMounted, 页面打开后马上执行
+    onMounted(() => {
+      //发送ajax请求，获取图片验证码
+      state.getValidateCode()
+    })
+
     const state = reactive({
       model: {
         userName: 'admin',
         password: '111111',
+        codeKey: '', //验证码对应的key
+        codeValue: '', //验证码的图片base64
+        captcha: '', //输入框填写的验证码
       },
       rules: getRules(),
       loading: false,
@@ -110,34 +138,62 @@ export default defineComponent({
         state.loading ? ctx.$t('login.logining') : ctx.$t('login.login')
       ),
       loginForm: ref(null),
+      getValidateCode: async () => {
+        //发送ajax请求，获取图片验证码
+        const { code, data, message } = await GetCaptcha()
+        if (code === 200) {
+          //验证码对应的key
+          state.model.codeKey = data.codeKey
+          //验证码的图片
+          state.model.codeValue = 'data:image/png;base64,' + data.codeValue
+        } else {
+          //错误提示
+          ctx.$message.error(message)
+        }
+      },
       submit: () => {
+        //避免重复点击-如果正在加载中，则直接返回停止
         if (state.loading) {
           return
         }
         state.loginForm.validate(async valid => {
+          //如果表单验证通过
           if (valid) {
+            //开始加载层
             state.loading = true
+            //发送ajax请求，完成登录
             const { code, data, message } = await Login(state.model)
             if (+code === 200) {
+              //登录成功
+
+              //提示消息
               ctx.$message.success({
                 message: ctx.$t('login.loginsuccess'),
                 duration: 1000,
               })
 
+              //获取路径中的redirect参数，去上一个页面
               const targetPath = decodeURIComponent(route.query.redirect)
               if (targetPath.startsWith('http')) {
-                // 如果是一个url地址
+                // 如果路径是http开头，则直接跳转过去
                 window.location.href = targetPath
               } else if (targetPath.startsWith('/')) {
-                // 如果是内部路由地址
+                // 如果是/开头，则使用路由跳转到当前项目的页面
                 router.push(targetPath)
               } else {
+                // 否则跳转到当前项目的首页
                 router.push('/')
               }
+
+              //将响应的数据data（token令牌），保存到localStorage对象中，浏览器保存了
               useApp().initToken(data)
             } else {
+              //重新加载验证码
+              state.getValidateCode()
+              //登录失败的提示
               ctx.$message.error(message)
             }
+            //关闭加载层
             state.loading = false
           }
         })
@@ -216,5 +272,17 @@ export default defineComponent({
       }
     }
   }
+}
+.captcha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.captcha img {
+  cursor: pointer;
+  margin-left: 10px;
+  width: 220px;
 }
 </style>
