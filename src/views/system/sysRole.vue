@@ -3,10 +3,10 @@
     <!-- 搜索表单 -->
     <el-form label-width="70px" size="small">
       <el-form-item label="角色名称">
-        <el-input style="width: 100%" placeholder="角色名称"></el-input>
+        <el-input style="width: 100%" placeholder="角色名称" v-model="queryDto.roleName"></el-input>
       </el-form-item>
       <el-row style="display:flex">
-        <el-button type="primary" size="small">搜索</el-button>
+        <el-button type="primary" size="small" @click="fetchData">搜索</el-button>
         <el-button size="small">重置</el-button>
       </el-row>
     </el-form>
@@ -29,10 +29,15 @@
   </el-table>
 
   <!--分页条-->
+  <!--分页条-->
   <el-pagination
-    :page-sizes="[5, 10, 20, 50]"
-    layout="total, sizes, prev, pager, next"
+    v-model:current-page="pageNum"
+    v-model:page-size="pageSize"
+    :page-sizes="[5, 10, 15, 20]"
+    layout="total, sizes, prev, pager, next, jumper"
     :total="total"
+    @size-change="fetchData"
+    @current-change="fetchData"
   />
 </template>
 
@@ -51,8 +56,9 @@
   //当前行数
   let pageSize = ref(5)
 
+
   //查询条件
-  let queryDto = ref({})
+  let queryDto = ref({roleName:''})
   //钩子函数onMounted,页面打开马上执行
   onMounted(()=>{
     fetchData()
@@ -62,6 +68,7 @@
     const {code,message,data} = await FindRoleListByPage(pageNum.value,pageSize.value,queryDto.value)
     if (code === 200) {
       list.value = data.list
+      total.value = data.total
     }
   }
 </script>
