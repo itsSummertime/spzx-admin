@@ -30,33 +30,40 @@
 
   <!--分页条-->
   <el-pagination
-    :page-sizes="[10, 20, 50, 100]"
+    :page-sizes="[5, 10, 20, 50]"
     layout="total, sizes, prev, pager, next"
     :total="total"
   />
 </template>
 
 <script setup>
-import { ref } from 'vue'
+  import { ref ,onMounted} from 'vue'
+  import {FindRoleListByPage} from '@/api/sysRole'
 
-// 分页条总记录数
-let total = ref(0)
+  // 分页条总记录数
+  let total = ref(0)
 
-// 定义表格数据模型
-let list = ref([
-  {
-    id: 9,
-    roleName: '系统管理员',
-    roleCode: 'xtgly',
-    createTime: '2023-07-31',
-  },
-  {
-    id: 10,
-    roleName: '商品管理员',
-    roleCode: 'spgly',
-    createTime: '2023-07-31',
-  },
-])
+  // 定义表格数据模型
+  let list = ref([])
+  //当前页码
+  let pageNum = ref(1)
+
+  //当前行数
+  let pageSize = ref(5)
+
+  //查询条件
+  let queryDto = ref({})
+  //钩子函数onMounted,页面打开马上执行
+  onMounted(()=>{
+    fetchData()
+  })
+
+  const fetchData = async() => {
+    const {code,message,data} = await FindRoleListByPage(pageNum.value,pageSize.value,queryDto.value)
+    if (code === 200) {
+      list.value = data.list
+    }
+  }
 </script>
 
 <style scoped>
