@@ -70,8 +70,9 @@ service.interceptors.response.use(
       ElMessage.error(res.message);
       // 中断程序
       return Promise.reject(new Error(res.message || 'Error'))
-    } else if (res.code != 200) {
-      ElMessage.error(res.message)
+    } else if(res.code != 200){
+      // 错误提示
+      ElMessage.error(res.message);
     }
     return res
   },
