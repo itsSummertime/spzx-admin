@@ -190,8 +190,6 @@ export default defineComponent({
             } else {
               //重新加载验证码
               state.getValidateCode()
-              //登录失败的提示
-              ctx.$message.error(message)
             }
             //关闭加载层
             state.loading = false

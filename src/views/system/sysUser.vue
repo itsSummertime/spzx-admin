@@ -31,7 +31,7 @@
 
   <!--添加按钮-->
   <div class="tools-div">
-    <el-button type="success" size="small">添 加</el-button>
+    <el-button type="success" size="small" @click="showAdd">添 加</el-button>
   </div>
 
   <!---数据表格-->
@@ -66,11 +66,54 @@
     @size-change="fetchData"
     @current-change="fetchData"
   />
+    <!-- 添加或修改的弹窗 -->
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="40%">
+    <el-form label-width="120px">
+      <el-form-item label="用户名">
+        <el-input v-model="sysUser.userName" />
+      </el-form-item>
+      <el-form-item v-if="sysUser.id == null" label="密码">
+        <el-input type="password" show-password v-model="sysUser.password" />
+      </el-form-item>
+      <el-form-item label="姓名">
+        <el-input v-model="sysUser.name" />
+      </el-form-item>
+      <el-form-item label="手机">
+        <el-input v-model="sysUser.phone" />
+      </el-form-item>
+      <el-form-item label="头像">
+        <el-upload
+          class="avatar-uploader"
+          action="http://localhost:8501/admin/system/file/upload"
+          :show-file-list="false"
+        >
+          <img v-if="sysUser.avatar" :src="sysUser.avatar" class="avatar" />
+          <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+        </el-upload>
+      </el-form-item>
+      <el-form-item label="描述">
+        <el-input v-model="sysUser.description" />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="submit">提交</el-button>
+        <el-button @click="dialogVisible = false">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { FindUserListByPage } from '@/api/sysUser'
+import { FindUserListByPage,AddUser } from '@/api/sysUser'
+import { ElMessage } from 'element-plus'
+
+//弹窗是否显示
+const dialogVisible = ref(false)
+//弹窗的标题
+const dialogTitle =ref("添加或修改")
+//弹窗绑定的对象
+const sysUser = ref({})
+
 
 // 表格数据模型
 const list = ref([])
@@ -112,6 +155,31 @@ const fetchData = async ()=>{
   if(code === 200){
     list.value = data.list;
     total.value = data.total;
+  }
+}
+
+//显示添加的弹窗
+const showAdd = () => {
+  //显示窗口,修改标题,清空表单
+  dialogVisible.value = true
+  dialogTitle.value = '添加用户'
+  sysUser.value = {}
+
+}
+//弹窗的提交按钮
+const submit = async ()=>{
+  if(sysUser.value.id){
+    //有id, 执行修改
+
+  }else{
+    //没有id, 执行添加
+    var {code} = await AddUser(sysUser.value)
+  }
+
+  if(code === 200){
+    ElMessage.success("操作成功")
+    dialogVisible.value = false
+    fetchData()
   }
 }
 </script>
