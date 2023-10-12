@@ -86,6 +86,8 @@
           class="avatar-uploader"
           action="http://localhost:8501/admin/system/file/upload"
           :show-file-list="false"
+          :headers="headers"
+          :on-success="onSuccess"
         >
           <img v-if="sysUser.avatar" :src="sysUser.avatar" class="avatar" />
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
@@ -106,6 +108,7 @@
 import { onMounted, ref } from 'vue'
 import { FindUserListByPage,AddUser,UpdateUser,DeleteUser} from '@/api/sysUser'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useApp } from '@/pinia/modules/app'
 
 //弹窗是否显示
 const dialogVisible = ref(false)
@@ -128,6 +131,11 @@ const queryDto = ref({})
 
 //时间组件绑定的变量
 const createTime = ref('')
+
+//上传组件的请求头
+const headers = ref({
+  token: useApp().authorization.token,
+})
 
 // 钩子函数onMounted，页面打开后马上执行
 onMounted(()=>{
@@ -211,7 +219,16 @@ const deleteById = (id) => {
       }
 
   )
+}
+// 上传的请求发送后
+const onSuccess = response => {
+  if (response.code === 200) {
+    //回显图片
+    sysUser.value.avatar = response.data
+  }else{
+    ElMessage.error(response.message)
   }
+}
 </script>
 
 <style scoped>
