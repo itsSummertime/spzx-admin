@@ -51,7 +51,7 @@
     <el-table-column prop="createTime" label="创建时间" />
     <el-table-column label="操作" align="center" width="280" #default="scope">
       <el-button type="primary" size="small" @click="showUpdate(scope.row)">修改</el-button>
-      <el-button type="danger" size="small">删除</el-button>
+      <el-button type="danger" size="small" @click="deleteById(scope.row.id)">删除</el-button>
       <el-button type="warning" size="small">分配角色</el-button>
     </el-table-column>
   </el-table>
@@ -104,8 +104,8 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { FindUserListByPage,AddUser,UpdateUser} from '@/api/sysUser'
-import { ElMessage } from 'element-plus'
+import { FindUserListByPage,AddUser,UpdateUser,DeleteUser} from '@/api/sysUser'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 //弹窗是否显示
 const dialogVisible = ref(false)
@@ -191,6 +191,27 @@ const submit = async ()=>{
     fetchData()
   }
 }
+
+const deleteById = (id) => {
+    ElMessageBox.confirm(
+      '此操作将删除该数据. 确定?',
+      '警告',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
+    .then(async () => {
+        const { code } = await DeleteUser(id)
+        if (code === 200) {
+            ElMessage.success('删除成功')
+            fetchData()
+        }
+      }
+
+  )
+  }
 </script>
 
 <style scoped>
