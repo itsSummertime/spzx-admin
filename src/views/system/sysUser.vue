@@ -49,8 +49,8 @@
       #default="scope"
     >{{ scope.row.status == 1 ? '正常' : '停用' }}</el-table-column>
     <el-table-column prop="createTime" label="创建时间" />
-    <el-table-column label="操作" align="center" width="280">
-      <el-button type="primary" size="small">修改</el-button>
+    <el-table-column label="操作" align="center" width="280" #default="scope">
+      <el-button type="primary" size="small" @click="showUpdate(scope.row)">修改</el-button>
       <el-button type="danger" size="small">删除</el-button>
       <el-button type="warning" size="small">分配角色</el-button>
     </el-table-column>
@@ -104,7 +104,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { FindUserListByPage,AddUser } from '@/api/sysUser'
+import { FindUserListByPage,AddUser,UpdateUser} from '@/api/sysUser'
 import { ElMessage } from 'element-plus'
 
 //弹窗是否显示
@@ -166,11 +166,20 @@ const showAdd = () => {
   sysUser.value = {}
 
 }
+//显示修改的弹窗
+const showUpdate = (row) => {
+  //显示窗口,修改标题,回显数据
+  dialogVisible.value = true
+  dialogTitle.value = '修改用户'
+  sysUser.value = {...row}
+
+
+}
 //弹窗的提交按钮
 const submit = async ()=>{
   if(sysUser.value.id){
     //有id, 执行修改
-
+    var {code} = await UpdateUser(sysUser.value)
   }else{
     //没有id, 执行添加
     var {code} = await AddUser(sysUser.value)
