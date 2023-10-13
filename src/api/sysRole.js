@@ -37,3 +37,11 @@ export const DeleteRole = (id) => {
     method: 'delete',
   })
 }
+
+// 查询分配角色列表
+export const FindAssignRoleList = (userId) => {
+  return request({
+    url: `${API}/findAssignRoleList/${userId}`,
+    method: 'get',
+  })
+}

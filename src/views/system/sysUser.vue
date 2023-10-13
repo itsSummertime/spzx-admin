@@ -52,7 +52,7 @@
     <el-table-column label="操作" align="center" width="280" #default="scope">
       <el-button type="primary" size="small" @click="showUpdate(scope.row)">修改</el-button>
       <el-button type="danger" size="small" @click="deleteById(scope.row.id)">删除</el-button>
-      <el-button type="warning" size="small">分配角色</el-button>
+      <el-button type="warning" size="small" @click="assignRole(scope.row)">分配角色</el-button>
     </el-table-column>
   </el-table>
 
@@ -102,19 +102,49 @@
       </el-form-item>
     </el-form>
   </el-dialog>
+  <!-- 分配角色弹窗 -->
+<el-dialog v-model="dialogRoleVisible" title="分配角色" width="40%">
+    <el-form label-width="80px">
+        <el-form-item label="用户名">
+            <el-input disabled :value="sysUser.userName"></el-input>
+        </el-form-item>
+
+        <el-form-item label="角色列表">
+            <el-checkbox-group v-model="userRoleIds">
+                <el-checkbox v-for="role in allRoles" :key="role.id" :label="role.id">
+                    {{ role.roleName }}
+                </el-checkbox>
+            </el-checkbox-group>
+        </el-form-item>
+
+        <el-form-item>
+            <el-button type="primary">提交</el-button>
+            <el-button @click="dialogRoleVisible = false">取消</el-button>
+        </el-form-item>
+    </el-form>
+</el-dialog>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
 import { FindUserListByPage,AddUser,UpdateUser,DeleteUser} from '@/api/sysUser'
+import {FindAssignRoleList} from '@/api/sysRole'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useApp } from '@/pinia/modules/app'
 
-//弹窗是否显示
+//分配角的弹窗是否显示
+const dialogRoleVisible = ref(false)
+//所有角色数组
+const allRoles = ref([])
+//拥有角色id数组
+const userRoleIds = ref([])
+
+
+//添加或修改弹窗是否显示
 const dialogVisible = ref(false)
-//弹窗的标题
+//添加或修改弹窗的标题
 const dialogTitle =ref("添加或修改")
-//弹窗绑定的对象
+//添加或修改 弹窗绑定的对象
 const sysUser = ref({})
 
 
@@ -229,6 +259,19 @@ const onSuccess = response => {
     ElMessage.error(response.message)
   }
 }
+
+//分配角色的按钮
+const assignRole = async row =>{
+  sysUser.value = {...row}
+  dialogRoleVisible.value = true
+  const {code,data} = await FindAssignRoleList(sysUser.value.id)
+  if(code === 200){
+    allRoles.value = data.allRoleList
+    userRoleIds.value = data.assignRoleList
+
+  }
+}
+
 </script>
 
 <style scoped>
