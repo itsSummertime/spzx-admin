@@ -118,7 +118,7 @@
         </el-form-item>
 
         <el-form-item>
-            <el-button type="primary">提交</el-button>
+            <el-button type="primary" @click="assignRoleSubmit">提交</el-button>
             <el-button @click="dialogRoleVisible = false">取消</el-button>
         </el-form-item>
     </el-form>
@@ -129,6 +129,7 @@
 import { onMounted, ref } from 'vue'
 import { FindUserListByPage,AddUser,UpdateUser,DeleteUser} from '@/api/sysUser'
 import {FindAssignRoleList} from '@/api/sysRole'
+import { AssignRole } from "@/api/sysUserRole";
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useApp } from '@/pinia/modules/app'
 
@@ -271,7 +272,20 @@ const assignRole = async row =>{
 
   }
 }
-
+//分配角色的提交
+const assignRoleSubmit = async () => {
+  const  assignRoleDto = {
+    userId: sysUser.value.id,
+    roleIdList: userRoleIds.value
+  }
+  //发送ajax请求
+  const {code} = await AssignRole(assignRoleDto)
+  if (code === 200) {
+    ElMessage.success("分配角色成功")
+    dialogRoleVisible.value = false
+    fetchData()
+  }
+}
 </script>
 
 <style scoped>
