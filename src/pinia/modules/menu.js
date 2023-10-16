@@ -11,8 +11,8 @@
  */
 import { defineStore } from 'pinia'
 import { fixedRoutes, asyncRoutes } from '@/router'
-import { GetMenus } from '@/api/menu'
-import router from '@/router'
+//import { GetMenus } from '@/api/menu'
+//import router from '@/router'
 import { ref } from 'vue'
 
 export const useMenus = defineStore('menu', () => {
