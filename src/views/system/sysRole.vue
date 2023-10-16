@@ -81,7 +81,7 @@
     <el-form label-width="80px">
       <el-tree
         :data="sysMenuTreeList"
-        ref="tree"
+        ref="treeRef"
         show-checkbox
         default-expand-all
         node-key="id"
@@ -89,7 +89,7 @@
         :props="defaultProps"
       />
       <el-form-item>
-        <el-button type="primary">提交</el-button>
+        <el-button type="primary" @click="assignMenuSubmit">提交</el-button>
         <el-button @click="dialogMenuVisible = false">取消</el-button>
       </el-form-item>
     </el-form>
@@ -100,6 +100,7 @@
 import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { FindAssignMenuList } from '@/api/sysMenu'
+import { AssignMenu } from '@/api/sysRoleMenu'
 
 import {
   FindRoleListByPage,
@@ -115,6 +116,10 @@ const dialogMenuVisible = ref(false)
 const sysMenuTreeList = ref([])
 //已分配的菜单
 const assignMenuList = ref([])
+//提交的对象
+const assignMenuDto = ref({})
+//绑定的对象
+const treeRef = ref()
 //默认属性
 const defaultProps = {
   label: 'title', //显示的属性名称
@@ -146,12 +151,44 @@ onMounted(() => {
   fetchData()
 })
 
+//分配菜单的提交
+const assignMenuSubmit = async ()=>{
+  //1.获取半选的菜单
+  let halfCheckedKeys = treeRef.value.getHalfCheckedKeys()
+  //拼接 [{menuId: 菜单id, isHalf: 1},...]>>>>>>>>>>>>>>>>>>>
+  //提取出数组中的每个元素，将返回值保存到一个新的数组中
+  let halfCheckedArr = halfCheckedKeys.map(menuId=>{
+    return {menuId: menuId, isHalf: 1}
+  })
+
+
+  //2.获取已选的菜单
+  let checkedKeys = treeRef.value.getCheckedKeys()
+  //拼接 [{menuId: 菜单id, isHalf: 0},...]
+  let checkedArr = checkedKeys.map(menuId=>{
+    return {menuId: menuId, isHalf: 0}
+  })
+
+  //3.合并到参数assignMenuDto的属性menuIdList
+  assignMenuDto.value.menuIdList = [...halfCheckedArr, ...checkedArr]
+
+  //发送ajax请求
+  const {code} = await AssignMenu(assignMenuDto.value)
+  if(code === 200){
+    ElMessage.success("分配菜单成功")
+    dialogMenuVisible.value = false
+    fetchData()
+  }
+}
+
 //分配菜单的弹窗显示
 const assignMenuShow = async id => {
   //显示窗口
   dialogMenuVisible.value = true
   //清空已分配的菜单id
   assignMenuList.value = []
+  //帮存角色id到要提交的对象中
+  assignMenuDto.value.roleId = id
 
   //发送ajax请求获取两个列表
   const {code,data} = await FindAssignMenuList(id)
