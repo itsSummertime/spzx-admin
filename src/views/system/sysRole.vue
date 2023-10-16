@@ -3,10 +3,16 @@
     <!-- 搜索表单 -->
     <el-form label-width="70px" size="small">
       <el-form-item label="角色名称">
-        <el-input style="width: 100%" placeholder="角色名称" v-model="queryDto.roleName"></el-input>
+        <el-input
+          style="width: 100%"
+          placeholder="角色名称"
+          v-model="queryDto.roleName"
+        ></el-input>
       </el-form-item>
-      <el-row style="display:flex">
-        <el-button type="primary" size="small" @click="fetchData">搜索</el-button>
+      <el-row style="display: flex">
+        <el-button type="primary" size="small" @click="fetchData">
+          搜索
+        </el-button>
         <el-button size="small" @click="reset">重置</el-button>
       </el-row>
     </el-form>
@@ -24,8 +30,19 @@
     <el-table-column prop="description" label="角色描述" width="180" />
     <el-table-column prop="createTime" label="创建时间" />
     <el-table-column label="操作" align="center" width="280" #default="scope">
-      <el-button type="primary" size="small" @click="showUpdate(scope.row)">修改</el-button>
-      <el-button type="danger" size="small" @click="deleteById(scope.row.id)">删除</el-button>
+      <el-button type="primary" size="small" @click="showUpdate(scope.row)">
+        修改
+      </el-button>
+      <el-button type="danger" size="small" @click="deleteById(scope.row.id)">
+        删除
+      </el-button>
+      <el-button
+        type="warning"
+        size="small"
+        @click="assignMenuShow(scope.row.id)"
+      >
+        分配菜单
+      </el-button>
     </el-table-column>
   </el-table>
 
@@ -58,11 +75,31 @@
       </el-form-item>
     </el-form>
   </el-dialog>
+
+  <!-- 分配菜单的弹窗 tree组件添加ref属性，后期方便进行tree组件对象的获取-->
+  <el-dialog v-model="dialogMenuVisible" title="分配菜单" width="40%">
+    <el-form label-width="80px">
+      <el-tree
+        :data="sysMenuTreeList"
+        ref="tree"
+        show-checkbox
+        default-expand-all
+        node-key="id"
+        :default-checked-keys="assignMenuList"
+        :props="defaultProps"
+      />
+      <el-form-item>
+        <el-button type="primary">提交</el-button>
+        <el-button @click="dialogMenuVisible = false">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { FindAssignMenuList } from '@/api/sysMenu'
 
 import {
   FindRoleListByPage,
@@ -71,11 +108,25 @@ import {
   DeleteRole,
 } from '@/api/sysRole'
 
-//弹窗是否显示
+//分配菜单的弹窗>>>
+//是否显示
+const dialogMenuVisible = ref(false)
+//树节点菜单
+const sysMenuTreeList = ref([])
+//已分配的菜单
+const assignMenuList = ref([])
+//默认属性
+const defaultProps = {
+  label: 'title', //显示的属性名称
+  children: 'children', //子属性的名称
+}
+
+//添加获取修改角色的弹窗>>>
+//是否显示
 let dialogVisible = ref(false)
-//弹窗的标题
+//标题
 let dialogTitle = ref('添加获取修改角色')
-//弹窗绑定的对象
+//绑定的对象
 let sysRole = ref({})
 
 // 分页条总记录数
@@ -95,29 +146,42 @@ onMounted(() => {
   fetchData()
 })
 
+//分配菜单的弹窗显示
+const assignMenuShow = async id => {
+  //显示窗口
+  dialogMenuVisible.value = true
+  //清空已分配的菜单id
+  assignMenuList.value = []
+
+  //发送ajax请求获取两个列表
+  const {code,data} = await FindAssignMenuList(id)
+  if(code === 200){
+    //树节点菜单
+    sysMenuTreeList.value = data.treeList
+    //已分配的菜单id
+    assignMenuList.value = data.menuIdList
+  }
+}
+
 //重置
-const reset = ()=>{
+const reset = () => {
   queryDto.value = {}
   fetchData()
 }
 
 //逻辑删除
 const deleteById = async id => {
-  ElMessageBox.confirm(
-    '此操作将删除该数据. 确定?',
-    '警告',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
-  )
+  ElMessageBox.confirm('此操作将删除该数据. 确定?', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
     .then(async () => {
-        const { code } = await DeleteRole(id)
-        if (code === 200) {
-            ElMessage.success('删除成功')
-            fetchData()
-        }
+      const { code } = await DeleteRole(id)
+      if (code === 200) {
+        ElMessage.success('删除成功')
+        fetchData()
+      }
     })
     .catch(() => {})
 }

@@ -36,3 +36,11 @@ export const DeleteMenu = (id) => {
     method: 'delete',
   })
 }
+
+// 查询分配菜单列表
+export const FindAssignMenuList = (roleId) => {
+  return request({
+    url: `${API}/findAssignMenuList/${roleId}`,
+    method: 'get',
+  })
+}
