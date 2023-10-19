@@ -1,30 +1,20 @@
-// 导入组件
 const Layout = () => import('@/layout/index.vue')
-const sysRole = () => import('@/views/system/sysRole.vue')
-const sysUser = () => import('@/views/system/sysUser.vue')
-const sysMenu = () => import('@/views/system/sysMenu.vue')
+const sysUser = () => import('@/views/system/sysUser.vue') //用户管理页面
+const sysRole = () => import('@/views/system/sysRole.vue') //角色管理页面
+const sysMenu = () => import('@/views/system/sysMenu.vue') //菜单管理页面
 
-// 导出该组件
-export default([
+export default [
     {
-        path: "/system",
+        path: '/system',
         component: Layout,
         name: 'system',
         meta: {
             title: '系统管理',
         },
-        icon: 'Location',
+        icon: 'Setting',
         children: [
             {
-                path: '/sysRole',
-                name: 'sysRole',
-                component: sysRole,
-                meta: {
-                    title: '角色管理',
-                },
-            },
-            {
-                path: '/sysUser',
+                path: 'sysUser',
                 name: 'sysUser',
                 component: sysUser,
                 meta: {
@@ -32,13 +22,21 @@ export default([
                 },
             },
             {
-                path: '/menu',
+                path: 'sysRole',
+                name: 'sysRole',
+                component: sysRole,
+                meta: {
+                    title: '角色管理',
+                },
+            },
+            {
+                path: 'sysMenu',
                 name: 'sysMenu',
                 component: sysMenu,
                 meta: {
                     title: '菜单管理',
                 },
-            }
-        ]
-    }
-])
+            },
+        ],
+    },
+]

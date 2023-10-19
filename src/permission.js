@@ -35,7 +35,6 @@
 
 import { ElLoading } from 'element-plus'
 import router from '@/router'
-// import store from '@/store'
 import { TOKEN } from '@/pinia/modules/app' // TOKEN变量名
 import { nextTick } from 'vue'
 import { useApp } from './pinia/modules/app'
@@ -67,6 +66,7 @@ router.beforeEach(async to => {
     return true
   }
   if (!window.localStorage[TOKEN]) {
+    // localStorage中没有token令牌时，会直接重定向到登录页面
     return {
       name: 'login',
       query: {
@@ -75,6 +75,7 @@ router.beforeEach(async to => {
       replace: true,
     }
   } else {
+    // localStorage中有token令牌时,则执行ajax请求获取当前用户信息
     const { userinfo, getUserinfo } = useAccount()
     // 获取用户角色信息，根据角色判断权限
     if (!userinfo) {

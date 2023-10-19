@@ -70,9 +70,11 @@ service.interceptors.response.use(
       ElMessage.error(res.message);
       // 中断程序
       return Promise.reject(new Error(res.message || 'Error'))
-    } else if(res.code != 200){
-      // 错误提示
-      ElMessage.error(res.message);
+    } else if (res.code != 200) {
+      if (response.config.responseType != 'blob') {
+        // 响应的数据不是文件时，才给出错误提示
+        ElMessage.error(res.message);
+      }
     }
     return res
   },

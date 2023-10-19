@@ -48,7 +48,10 @@ export const useApp = defineStore('app', {
       setItem(TOKEN, data)
     },
     initToken(data) {
+      //清除localStorage中保存的token
       this.clearToken()
+
+      //保存token到localStorage中
       this.setToken(data)
     },
     clearToken() {

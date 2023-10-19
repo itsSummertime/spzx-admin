@@ -35,6 +35,7 @@ export const getItem = name => {
 
 export const setItem = (name, value) => {
   if (typeof value === 'object') {
+    //将对象转为json字符串
     value = JSON.stringify(value)
   }
 

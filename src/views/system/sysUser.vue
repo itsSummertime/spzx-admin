@@ -5,7 +5,11 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="关键字">
-            <el-input v-model="queryDto.keyword" style="width: 100%" placeholder="用户名、姓名、手机号码"></el-input>
+            <el-input
+              v-model="queryDto.keyword"
+              style="width: 100%"
+              placeholder="用户名、姓名、手机号码"
+            ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -22,8 +26,10 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row style="display:flex">
-        <el-button type="primary" size="small" @click="fetchData">搜索</el-button>
+      <el-row style="display: flex">
+        <el-button type="primary" size="small" @click="fetchData">
+          搜索
+        </el-button>
         <el-button size="small" @click="reset">重置</el-button>
       </el-row>
     </el-form>
@@ -43,16 +49,20 @@
       <img :src="scope.row.avatar" width="50" />
     </el-table-column>
     <el-table-column prop="description" label="描述" />
-    <el-table-column
-      prop="status"
-      label="状态"
-      #default="scope"
-    >{{ scope.row.status == 1 ? '正常' : '停用' }}</el-table-column>
-    <el-table-column prop="createTime" label="创建时间" />
+    <el-table-column prop="status" label="状态" #default="scope">
+      {{ scope.row.status == 1 ? '正常' : '停用' }}
+    </el-table-column>
+    <el-table-column prop="createTime" label="创建时间" width="160" />
     <el-table-column label="操作" align="center" width="280" #default="scope">
-      <el-button type="primary" size="small" @click="showUpdate(scope.row)">修改</el-button>
-      <el-button type="danger" size="small" @click="deleteById(scope.row.id)">删除</el-button>
-      <el-button type="warning" size="small" @click="assignRole(scope.row)">分配角色</el-button>
+      <el-button type="primary" size="small" @click="showUpdate(scope.row)">
+        修改
+      </el-button>
+      <el-button type="danger" size="small" @click="deleteById(scope.row.id)">
+        删除
+      </el-button>
+      <el-button type="warning" size="small" @click="assignRoleShow(scope.row)">
+        分配角色
+      </el-button>
     </el-table-column>
   </el-table>
 
@@ -66,8 +76,9 @@
     @size-change="fetchData"
     @current-change="fetchData"
   />
-    <!-- 添加或修改的弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="40%">
+
+  <!-- 添加或修改的弹窗 -->
+  <el-dialog v-model="dialogVisible" :title="dialogTitle" width="40%">
     <el-form label-width="120px">
       <el-form-item label="用户名">
         <el-input v-model="sysUser.userName" />
@@ -102,52 +113,63 @@
       </el-form-item>
     </el-form>
   </el-dialog>
-  <!-- 分配角色弹窗 -->
-<el-dialog v-model="dialogRoleVisible" title="分配角色" width="40%">
+
+  <!-- 分配角色的弹窗 -->
+  <el-dialog v-model="dialogRoleVisible" title="分配角色" width="40%">
     <el-form label-width="80px">
-        <el-form-item label="用户名">
-            <el-input disabled :value="sysUser.userName"></el-input>
-        </el-form-item>
+      <el-form-item label="用户名">
+        <el-input disabled :value="sysUser.userName"></el-input>
+      </el-form-item>
 
-        <el-form-item label="角色列表">
-            <el-checkbox-group v-model="userRoleIds">
-                <el-checkbox v-for="role in allRoles" :key="role.id" :label="role.id">
-                    {{ role.roleName }}
-                </el-checkbox>
-            </el-checkbox-group>
-        </el-form-item>
+      <el-form-item label="角色列表">
+        <el-checkbox-group v-model="userRoleIds">
+          <el-checkbox v-for="role in allRoles" :key="role.id" :label="role.id">
+            {{ role.roleName }}
+          </el-checkbox>
+        </el-checkbox-group>
+      </el-form-item>
 
-        <el-form-item>
-            <el-button type="primary" @click="assignRoleSubmit">提交</el-button>
-            <el-button @click="dialogRoleVisible = false">取消</el-button>
-        </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="assignRoleSubmit">提交</el-button>
+        <el-button @click="dialogRoleVisible = false">取消</el-button>
+      </el-form-item>
     </el-form>
-</el-dialog>
+  </el-dialog>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { FindUserListByPage,AddUser,UpdateUser,DeleteUser} from '@/api/sysUser'
-import {FindAssignRoleList} from '@/api/sysRole'
-import { AssignRole } from "@/api/sysUserRole";
+import {
+  FindUserListByPage,
+  AddUser,
+  UpdateUser,
+  DeleteUser,
+} from '@/api/sysUser'
+import { FindAssignRoleList } from '@/api/sysRole'
+import { AssignRole } from '@/api/sysUserRole'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useApp } from '@/pinia/modules/app'
 
-//分配角的弹窗是否显示
+//上传组件的请求头
+const headers = ref({
+  token: useApp().authorization.token,
+})
+
+//分配角色的弹窗>>>
+// 是否显示
 const dialogRoleVisible = ref(false)
-//所有角色数组
+// 所有角色列表
 const allRoles = ref([])
-//拥有角色id数组
+// 拥有的角色id列表
 const userRoleIds = ref([])
 
-
-//添加或修改弹窗是否显示
+//添加或修改的弹窗>>>
+// 是否显示
 const dialogVisible = ref(false)
-//添加或修改弹窗的标题
-const dialogTitle =ref("添加或修改")
-//添加或修改 弹窗绑定的对象
+// 标题
+const dialogTitle = ref('添加或修改')
+// 绑定的对象
 const sysUser = ref({})
-
 
 // 表格数据模型
 const list = ref([])
@@ -163,127 +185,129 @@ const queryDto = ref({})
 //时间组件绑定的变量
 const createTime = ref('')
 
-//上传组件的请求头
-const headers = ref({
-  token: useApp().authorization.token,
-})
-
 // 钩子函数onMounted，页面打开后马上执行
-onMounted(()=>{
+onMounted(() => {
   //查询用户列表
   fetchData()
 })
 
+//分配角色的提交
+const assignRoleSubmit = async () => {
+  //需要提交的参数
+  const assignRoleDto = {
+    userId: sysUser.value.id,
+    roleIdList: userRoleIds.value,
+  }
+
+  //发送ajax请求
+  const { code } = await AssignRole(assignRoleDto)
+  if (code === 200) {
+    ElMessage.success('分配角色成功')
+    dialogRoleVisible.value = false
+    fetchData()
+  }
+}
+
+//分配角色的显示
+const assignRoleShow = async row => {
+  //显示窗口、回显用户名
+  dialogRoleVisible.value = true
+  sysUser.value = { ...row }
+
+  //发送ajax请求获取两个列表数据
+  const { code, data } = await FindAssignRoleList(sysUser.value.id)
+  if (code === 200) {
+    //所有角色列表
+    allRoles.value = data.allRoleList
+    //拥有的角色id
+    userRoleIds.value = data.assignRoleList
+  }
+}
+
+// 上传的请求发送后
+const onSuccess = response => {
+  if (response.code === 200) {
+    //回显图片
+    sysUser.value.avatar = response.data
+  } else {
+    ElMessage.error(response.message)
+  }
+}
+
+//逻辑删除
+const deleteById = id => {
+  ElMessageBox.confirm('此操作将删除该数据. 确定?', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(async () => {
+      const { code } = await DeleteUser(id)
+      if (code === 200) {
+        ElMessage.success('删除成功')
+        fetchData()
+      }
+    })
+    .catch(() => {})
+}
+
+//显示修改的窗口
+const showUpdate = row => {
+  //显示窗口、修改标题、数据回显
+  dialogVisible.value = true
+  dialogTitle.value = '修改用户'
+  sysUser.value = { ...row }
+}
+
+//弹窗的提交按钮
+const submit = async () => {
+  if (sysUser.value.id) {
+    //有id, 执行修改
+    var { code } = await UpdateUser(sysUser.value)
+  } else {
+    //没有id, 执行添加
+    var { code } = await AddUser(sysUser.value)
+  }
+
+  if (code === 200) {
+    ElMessage.success('操作成功')
+    dialogVisible.value = false
+    fetchData()
+  }
+}
+
+//显示添加的弹窗
+const showAdd = () => {
+  //显示窗口、修改标题、清空表单
+  dialogVisible.value = true
+  dialogTitle.value = '添加用户'
+  sysUser.value = {}
+}
+
 //重置
-const reset = ()=>{
+const reset = () => {
   queryDto.value = {}
   createTime.value = ''
   fetchData()
 }
 
 //分页查询
-const fetchData = async ()=>{
-  if(createTime.value != ''){
+const fetchData = async () => {
+  if (createTime.value != '') {
     //如果选择了时间，则提取出开始时间和结束时间
     queryDto.value.createTimeBegin = createTime.value['0']
     queryDto.value.createTimeEnd = createTime.value['1']
   }
 
   //发送ajax请求
-  const {code, data} = await FindUserListByPage(pageNum.value, pageSize.value, queryDto.value)
-  if(code === 200){
-    list.value = data.list;
-    total.value = data.total;
-  }
-}
-
-//显示添加的弹窗
-const showAdd = () => {
-  //显示窗口,修改标题,清空表单
-  dialogVisible.value = true
-  dialogTitle.value = '添加用户'
-  sysUser.value = {}
-
-}
-//显示修改的弹窗
-const showUpdate = (row) => {
-  //显示窗口,修改标题,回显数据
-  dialogVisible.value = true
-  dialogTitle.value = '修改用户'
-  sysUser.value = {...row}
-
-
-}
-//弹窗的提交按钮
-const submit = async ()=>{
-  if(sysUser.value.id){
-    //有id, 执行修改
-    var {code} = await UpdateUser(sysUser.value)
-  }else{
-    //没有id, 执行添加
-    var {code} = await AddUser(sysUser.value)
-  }
-
-  if(code === 200){
-    ElMessage.success("操作成功")
-    dialogVisible.value = false
-    fetchData()
-  }
-}
-
-const deleteById = (id) => {
-    ElMessageBox.confirm(
-      '此操作将删除该数据. 确定?',
-      '警告',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
+  const { code, data } = await FindUserListByPage(
+    pageNum.value,
+    pageSize.value,
+    queryDto.value
   )
-    .then(async () => {
-        const { code } = await DeleteUser(id)
-        if (code === 200) {
-            ElMessage.success('删除成功')
-            fetchData()
-        }
-      }
-
-  )
-}
-// 上传的请求发送后
-const onSuccess = response => {
-  if (response.code === 200) {
-    //回显图片
-    sysUser.value.avatar = response.data
-  }else{
-    ElMessage.error(response.message)
-  }
-}
-
-//分配角色的按钮
-const assignRole = async row =>{
-  sysUser.value = {...row}
-  dialogRoleVisible.value = true
-  const {code,data} = await FindAssignRoleList(sysUser.value.id)
-  if(code === 200){
-    allRoles.value = data.allRoleList
-    userRoleIds.value = data.assignRoleList
-
-  }
-}
-//分配角色的提交
-const assignRoleSubmit = async () => {
-  const  assignRoleDto = {
-    userId: sysUser.value.id,
-    roleIdList: userRoleIds.value
-  }
-  //发送ajax请求
-  const {code} = await AssignRole(assignRoleDto)
   if (code === 200) {
-    ElMessage.success("分配角色成功")
-    dialogRoleVisible.value = false
-    fetchData()
+    list.value = data.list
+    total.value = data.total
   }
 }
 </script>

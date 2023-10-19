@@ -10,12 +10,14 @@
  * @Donate: https://huzhushan.gitee.io/vue3-element-admin/donate/
  */
 import request from '@/utils/request'
-const API = '/admin/system/index/'
+
+// 后台登录接口
+const API = '/admin/system/index';
 
 // 登录接口
 export const Login = data => {
   return request({
-    url: `${API}login`,
+    url: `${API}/login`,
     method: 'post',
     data,
   })
@@ -24,7 +26,7 @@ export const Login = data => {
 // 获取登录用户信息
 export const GetUserinfo = () => {
   return request({
-    url: `${API}getUserInfo`,
+    url: `${API}/getUserInfo`,
     method: 'get',
   })
 }
@@ -32,7 +34,7 @@ export const GetUserinfo = () => {
 // 退出
 export const Logout = () => {
   return request({
-    url: `${API}logout`,
+    url: `${API}/logout`,
     method: 'get',
   })
 }
@@ -40,7 +42,7 @@ export const Logout = () => {
 // 获取图片验证码
 export const GetCaptcha = () => {
   return request({
-    url: `${API}getCaptcha`,
+    url: `${API}/getCaptcha`,
     method: 'get',
   })
 }

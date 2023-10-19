@@ -24,6 +24,7 @@ export const useAccount = defineStore('account', {
     },
     // 获取用户信息
     async getUserinfo() {
+      //发送ajax请求获取当前用户信息
       const { code, data } = await GetUserinfo()
       if (+code === 200) {
         this.userinfo = data

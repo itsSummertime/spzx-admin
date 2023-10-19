@@ -95,7 +95,7 @@
     </el-form>
   </el-dialog>
 </template>
-
+  
 <script setup>
 import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -161,7 +161,7 @@ const assignMenuSubmit = async ()=>{
     return {menuId: menuId, isHalf: 1}
   })
 
-
+  
   //2.获取已选的菜单
   let checkedKeys = treeRef.value.getCheckedKeys()
   //拼接 [{menuId: 菜单id, isHalf: 0},...]
@@ -278,7 +278,7 @@ const fetchData = async () => {
   }
 }
 </script>
-
+  
   <style scoped>
 .search-div {
   margin-bottom: 10px;
